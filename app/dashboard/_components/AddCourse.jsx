@@ -20,7 +20,7 @@ function AddCourse() {
           Create new course with AI, Share with friends and Earn from it
         </p>
       </div>
-      <Link href={userCourseList?.length>=5?'/dashboard/upgrade':'/create-course'}>
+      <Link href={'/create-course'}>
       <Button>+ Create AI Course</Button>
       </Link>
     </div>
