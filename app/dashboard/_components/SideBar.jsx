@@ -1,85 +1,11 @@
-// "use client";
-// import React from "react";
-// import Image from "next/image";
-// import Link from "next/link";
-// import { usePathname } from "next/navigation";
-// import {
-//   HiOutlineHome,
-//   HiOutlineSquare3Stack3D,
-//   HiOutlineShieldCheck,
-//   HiOutlinePower,
-// } from "react-icons/hi2";
-// import { Progress } from "@/components/ui/progress";
-
-// function SideBar() {
-//   const Menu = [
-//     {
-//       id: 1,
-//       name: "Home",
-//       icon: <HiOutlineHome />,
-//       path: "/dashboard",
-//     },
-//     {
-//       id: 2,
-//       name: "Explore",
-//       icon: <HiOutlineSquare3Stack3D />,
-//       path: "/dashboard/explore",
-//     },
-//     {
-//       id: 3,
-//       name: "Upgrade",
-//       icon: <HiOutlineShieldCheck />,
-//       path: "/dashboard/upgrade",
-//     },
-//     {
-//       id: 4,
-//       name: "Logout",
-//       icon: <HiOutlinePower />,
-//       path: "/dashboard/logout",
-//     },
-//   ];
-
-//   const path = usePathname();
-
-//   return (
-//     <div className="fixed h-full md:w-64 p-5 shadow-md">
-//       <Image src="/logo.svg" width={160} height={100} alt="Logo" />
-//       <hr className="my-5" />
-//       <ul>
-//         {Menu.map((item) => (
-//           <Link key={item.id} href={item.path}>
-//             <div
-//               className={`flex items-center gap-2 text-gray-600
-//           p-3 cursor-pointer hover:bg-gray-100
-//           hover:text-black rounded-lg mb-4
-//           ${item.path === path && "bg-gray-100 text-black"}`}
-//             >
-//               <div className="text-2xl">{item.icon}</div>
-//               <h2>{item.name}</h2>
-//             </div>
-//           </Link>
-//         ))}
-//       </ul>
-
-//       <div className="absolute bottom-10 w-[80%]">
-//         <Progress value={33} />
-//         <h2 className="text-sm my-2">3 Out of 5 Course created</h2>
-//         <h2 className="text-xs text-gray-500">
-//           Upgrade your plan for unlimted course generate
-//         </h2>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default SideBar;
 
 "use client";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useContext } from "react";
+import { useClerk } from "@clerk/nextjs";
 import {
   HiOutlineHome,
   HiOutlineSquare3Stack3D,
@@ -90,6 +16,8 @@ import { UserCourseListContext } from "@/app/_context/UserCourseListContext";
 
 function SideBar() {
   const { userCourseList } = useContext(UserCourseListContext);
+  const { signOut } = useClerk();
+  const router = useRouter();
 
   const Menu = [
     {
@@ -104,21 +32,27 @@ function SideBar() {
       icon: <HiOutlineSquare3Stack3D />,
       path: "/dashboard/explore",
     },
-    {
-      id: 3,
-      name: "Upgrade",
-      icon: <HiOutlineShieldCheck />,
-      path: "/dashboard/upgrade",
-    },
+    // {
+    //   id: 3,
+    //   name: "Upgrade",
+    //   icon: <HiOutlineShieldCheck />,
+    //   path: "/dashboard/upgrade",
+    // },
     {
       id: 4,
       name: "Logout",
       icon: <HiOutlinePower />,
       path: "/dashboard/logout",
+      isLogout: true,
     },
   ];
 
   const path = usePathname();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className="fixed h-full md:w-64 p-5 shadow-md">
@@ -126,29 +60,40 @@ function SideBar() {
       <hr className="my-5" />
 
       <ul>
-        {Menu.map((item) => (
-          <Link href={item.path} key={item.id}>
+        {Menu.map((item) =>
+          item.isLogout ? (
             <div
+              key={item.id}
+              onClick={handleLogout}
               className={`flex items-center gap-2 text-gray-600
                   p-3 cursor-pointer hover:bg-gray-100
-                  hover:text-black rounded-lg mb-3
-                  ${item.path === path ? "bg-gray-100 text-black" : ""}`}
+                  hover:text-black rounded-lg mb-3`}
             >
               <div className="text-2xl">{item.icon}</div>
               <h2>{item.name}</h2>
             </div>
-          </Link>
-        ))}
+          ) : (
+            <Link href={item.path} key={item.id}>
+              <div
+                className={`flex items-center gap-2 text-gray-600
+                    p-3 cursor-pointer hover:bg-gray-100
+                    hover:text-black rounded-lg mb-3
+                    ${item.path === path ? "bg-gray-100 text-black" : ""}`}
+              >
+                <div className="text-2xl">{item.icon}</div>
+                <h2>{item.name}</h2>
+              </div>
+            </Link>
+          )
+        )}
       </ul>
 
       <div className="absolute bottom-10 w-[80%]">
-        <Progress value={(userCourseList?.length / 5) * 100} />
+        <Progress value={(userCourseList?.length / 100) * 100} />
         <h2 className="text-sm my-2">
-          {userCourseList?.length} Out of 5 Course created
+          {userCourseList?.length} Course created out of 100
         </h2>
-        <h2 className="text-xs text-gray-500">
-          Upgrade your plan for unlimited course generation
-        </h2>
+        <h2 className="text-xs text-gray-500">unlimited course generation</h2>
       </div>
     </div>
   );
